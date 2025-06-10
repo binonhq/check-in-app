@@ -152,7 +152,14 @@ export default function Home() {
                 <SelectContent>
                   {members.map((member) => (
                     <SelectItem key={member.name} value={member.name}>
-                      {member.name} {member.role && `${member.role}`}
+                      <div className="flex items-center gap-2">
+                        <span>{member.name}</span>
+                        {member.role && (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
+                            {member.role}
+                          </span>
+                        )}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -164,10 +171,12 @@ export default function Home() {
                 <div className="flex items-center gap-2 text-blue-700">
                   <User className="w-4 h-4" />
                   <span className="font-medium">{selectedMemberData.name}</span>
+                  {selectedMemberData.role && (
+                    <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
+                      {selectedMemberData.role}
+                    </span>
+                  )}
                 </div>
-                {selectedMemberData.role && (
-                  <p className="text-sm text-blue-600 mt-1">Phòng ban: {selectedMemberData.role}</p>
-                )}
               </div>
             )}
 

@@ -23,9 +23,9 @@ export async function getMembers() {
 
 export async function appendCheckIn(name: string) {
   const now = new Date();
-  const date = now.toLocaleDateString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+  const date = now.toLocaleDateString('en-US', { timeZone: 'Asia/Bangkok' });
   const time = now.toLocaleTimeString('en-US', { 
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZone: 'Asia/Bangkok',
     hour12: false,
     hour: '2-digit',
     minute: '2-digit',
