@@ -1,103 +1,213 @@
-import Image from "next/image";
+"use client"
+
+import type React from "react"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Loader2, CheckCircle, Clock, User } from "lucide-react"
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [members, setMembers] = useState<{ name: string; role: string }[]>([])
+  const [selectedMember, setSelectedMember] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState("")
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("")
+  const [fetchingMembers, setFetchingMembers] = useState(true)
+  const [checkInTime, setCheckInTime] = useState("")
+  const [checkedInMember, setCheckedInMember] = useState("")
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  useEffect(() => {
+    setFetchingMembers(true)
+    fetch("/api/members")
+      .then((res) => res.json())
+      .then((data) => {
+        setMembers(Array.isArray(data) ? data : [])
+        setFetchingMembers(false)
+      })
+      .catch((err) => {
+        console.error("Error fetching members:", err)
+        setMessage("Failed to load member list")
+        setMessageType("error")
+        setFetchingMembers(false)
+      })
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedMember) {
+      setMessage("Please select a member")
+      setMessageType("error")
+      return
+    }
+
+    setLoading(true)
+    setMessage("")
+    setMessageType("")
+
+    try {
+      const res = await fetch("/api/checkin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: selectedMember }),
+      })
+      const data = await res.json()
+
+      if (res.ok) {
+        const now = new Date()
+        const timeString = now.toLocaleTimeString("en-US", {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+        const dateString = now.toLocaleDateString("en-US")
+
+        setCheckInTime(`${timeString} - ${dateString}`)
+        setCheckedInMember(selectedMember)
+        setMessage("Check-in successful!")
+        setMessageType("success")
+        setSelectedMember("")
+      } else {
+        setMessage(data.error || "Check-in failed")
+        setMessageType("error")
+      }
+    } catch (err) {
+      console.error("Error submitting check-in:", err)
+      setMessage("Error submitting check-in")
+      setMessageType("error")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCheckInAnother = () => {
+    setMessage("")
+    setMessageType("")
+    setCheckedInMember("")
+    setCheckInTime("")
+  }
+
+  const selectedMemberData = members.find((member) => member.name === selectedMember)
+
+  if (messageType === "success" && checkedInMember) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-xl">
+          <CardHeader className="text-center space-y-4">
+            <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+              <Clock className="w-8 h-8 text-blue-600" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-gray-900">Attendance System</CardTitle>
+            <CardDescription className="text-gray-600">Daily attendance for employees</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6 text-center">
+            <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <CheckCircle className="w-10 h-10 text-green-600" />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-green-700">Check-in successful!</h3>
+              <p className="text-lg font-medium text-gray-900">{checkedInMember}</p>
+              <p className="text-sm text-gray-600">Time: {checkInTime}</p>
+            </div>
+
+            <Button onClick={handleCheckInAnother} variant="outline" className="w-full mt-6">
+              Check-in another employee
+            </Button>
+
+            <p className="text-xs text-gray-500 mt-4">
+              Automatic attendance system - {new Date().toLocaleDateString("en-US")}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-xl">
+        <CardHeader className="text-center space-y-4">
+          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+            <Clock className="w-8 h-8 text-blue-600" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-gray-900">Attendance System</CardTitle>
+          <CardDescription className="text-gray-600">Daily attendance for employees</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-3">
+              <Label htmlFor="member-select" className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <User className="w-4 h-4" />
+                Select Employee
+              </Label>
+              <Select value={selectedMember} onValueChange={setSelectedMember} disabled={fetchingMembers || loading}>
+                <SelectTrigger id="member-select" className="w-full">
+                  <SelectValue placeholder={fetchingMembers ? "Loading..." : "-- Choose employee --"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {members.map((member) => (
+                    <SelectItem key={member.name} value={member.name}>
+                      {member.name} {member.role && `${member.role}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {selectedMemberData && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 text-blue-700">
+                  <User className="w-4 h-4" />
+                  <span className="font-medium">{selectedMemberData.name}</span>
+                </div>
+                {selectedMemberData.role && (
+                  <p className="text-sm text-blue-600 mt-1">Department: {selectedMemberData.role}</p>
+                )}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-base font-medium"
+              disabled={loading || fetchingMembers || !selectedMember}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Clock className="mr-2 h-5 w-5" />
+                  Clock In
+                </>
+              )}
+            </Button>
+          </form>
+
+          {message && messageType === "error" && (
+            <Alert className="border-red-200 bg-red-50">
+              <AlertDescription className="text-red-800">{message}</AlertDescription>
+            </Alert>
+          )}
+
+          {fetchingMembers && (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">Loading employee list...</span>
+            </div>
+          )}
+
+          <p className="text-xs text-gray-500 text-center">
+            Automatic attendance system - {new Date().toLocaleDateString("en-US")}
+          </p>
+        </CardContent>
+      </Card>
     </div>
-  );
+  )
 }
