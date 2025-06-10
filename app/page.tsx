@@ -101,8 +101,8 @@ export default function Home() {
             <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
               <Clock className="w-8 h-8 text-blue-600" />
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">Attendance System</CardTitle>
-            <CardDescription className="text-gray-600">Daily attendance for employees</CardDescription>
+            <CardTitle className="text-2xl font-bold text-gray-900">Hệ Thống Chấm Công</CardTitle>
+            <CardDescription className="text-gray-600">Chấm công hàng ngày cho nhân viên</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 text-center">
             <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -110,17 +110,17 @@ export default function Home() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xl font-semibold text-green-700">Check-in successful!</h3>
+              <h3 className="text-xl font-semibold text-green-700">Chấm công thành công!</h3>
               <p className="text-lg font-medium text-gray-900">{checkedInMember}</p>
-              <p className="text-sm text-gray-600">Time: {checkInTime}</p>
+              <p className="text-sm text-gray-600">Thời gian: {checkInTime}</p>
             </div>
 
             <Button onClick={handleCheckInAnother} variant="outline" className="w-full mt-6">
-              Check-in another employee
+              Chấm công nhân viên khác
             </Button>
 
             <p className="text-xs text-gray-500 mt-4">
-              Automatic attendance system - {new Date().toLocaleDateString("en-US")}
+              Hệ thống chấm công tự động - {new Date().toLocaleDateString("en-US")}
             </p>
           </CardContent>
         </Card>
@@ -135,19 +135,19 @@ export default function Home() {
           <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
             <Clock className="w-8 h-8 text-blue-600" />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Attendance System</CardTitle>
-          <CardDescription className="text-gray-600">Daily attendance for employees</CardDescription>
+          <CardTitle className="text-2xl font-bold text-gray-900">Hệ Thống Chấm Công</CardTitle>
+          <CardDescription className="text-gray-600">Chấm công hàng ngày cho nhân viên</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-3">
               <Label htmlFor="member-select" className="flex items-center gap-2 text-sm font-medium text-gray-700">
                 <User className="w-4 h-4" />
-                Select Employee
+                Chọn Nhân Viên
               </Label>
               <Select value={selectedMember} onValueChange={setSelectedMember} disabled={fetchingMembers || loading}>
                 <SelectTrigger id="member-select" className="w-full">
-                  <SelectValue placeholder={fetchingMembers ? "Loading..." : "-- Choose employee --"} />
+                  <SelectValue placeholder={fetchingMembers ? "Đang tải..." : "-- Chọn nhân viên --"} />
                 </SelectTrigger>
                 <SelectContent>
                   {members.map((member) => (
@@ -166,7 +166,7 @@ export default function Home() {
                   <span className="font-medium">{selectedMemberData.name}</span>
                 </div>
                 {selectedMemberData.role && (
-                  <p className="text-sm text-blue-600 mt-1">Department: {selectedMemberData.role}</p>
+                  <p className="text-sm text-blue-600 mt-1">Phòng ban: {selectedMemberData.role}</p>
                 )}
               </div>
             )}
@@ -179,12 +179,12 @@ export default function Home() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Processing...
+                  Đang xử lý...
                 </>
               ) : (
                 <>
                   <Clock className="mr-2 h-5 w-5" />
-                  Clock In
+                  Chấm Công
                 </>
               )}
             </Button>
@@ -199,12 +199,12 @@ export default function Home() {
           {fetchingMembers && (
             <div className="flex items-center justify-center py-4">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-sm text-muted-foreground">Loading employee list...</span>
+              <span className="ml-2 text-sm text-muted-foreground">Đang tải danh sách nhân viên...</span>
             </div>
           )}
 
           <p className="text-xs text-gray-500 text-center">
-            Automatic attendance system - {new Date().toLocaleDateString("en-US")}
+            Hệ thống chấm công tự động - {new Date().toLocaleDateString("en-US")}
           </p>
         </CardContent>
       </Card>
